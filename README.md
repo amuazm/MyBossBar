@@ -1,5 +1,5 @@
 # MyBossBar
-Basic BossBar Commands To Track Entity Health For Nearby Players
+Basic Boss Bar Commands To Track Entity Health For Nearby Players
 
 Tested on: `Folia 1.19.4`
 
