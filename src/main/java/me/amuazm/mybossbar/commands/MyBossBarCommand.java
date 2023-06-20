@@ -250,7 +250,7 @@ public class MyBossBarCommand implements CommandExecutor {
                 tools.append(
                     MiniMessage.miniMessage()
                         .deserialize(
-                            " <click:run_command:'/mbsb remove "
+                            " <click:run_command:'/mbsb remove uuid "
                                 + livingEntity.getUniqueId()
                                 + "'>[Stop Tracking]</click>"));
 
