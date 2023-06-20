@@ -4,8 +4,8 @@ import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.function.Consumer;
-import me.amuazm.mybossbar.MyBossbar;
-import me.amuazm.mybossbar.managers.BossbarManager;
+import me.amuazm.mybossbar.MyBossBar;
+import me.amuazm.mybossbar.managers.BossBarManager;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
@@ -14,19 +14,19 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
-public class BossbarShower {
-  private final MyBossbar plugin;
-  private final BossbarManager bossbarManager;
+public class BossBarShower {
+  private final MyBossBar plugin;
+  private final BossBarManager bossBarManager;
   private final LivingEntity trackedEntity;
-  private final BossBar bossbar;
-  private final ScheduledTask bossbarTask;
+  private final BossBar bossBar;
+  private final ScheduledTask bossBarTask;
 
-  public BossbarShower(MyBossbar plugin, LivingEntity trackedEntity) {
+  public BossBarShower(MyBossBar plugin, LivingEntity trackedEntity) {
     this.plugin = plugin;
-    this.bossbarManager = plugin.getBossbarManager();
+    this.bossBarManager = plugin.getBossBarManager();
     this.trackedEntity = trackedEntity;
 
-    bossbar =
+    bossBar =
         BossBar.bossBar(
             Component.text(trackedEntity.getName()),
             (float) trackedEntity.getHealth()
@@ -42,7 +42,7 @@ public class BossbarShower {
               trackedEntity.getWorld().getNearbyPlayers(trackedEntity.getLocation(), 32).stream()
                   .map(Player::getUniqueId)
                   .toList();
-          Audience bossbarAudience =
+          Audience bossBarAudience =
               allAudience.filterAudience(
                   audience ->
                       audience instanceof Player player
@@ -52,25 +52,25 @@ public class BossbarShower {
                   audience ->
                       audience instanceof Player
                           && !nearbyPlayerUuids.contains(((Player) audience).getUniqueId()));
-          otherAudience.hideBossBar(bossbar);
+          otherAudience.hideBossBar(bossBar);
 
           if (!trackedEntity.isValid() || !(trackedEntity.getChunk().isLoaded())) {
-            bossbarManager.stopTracking(trackedEntity);
-            bossbarAudience.hideBossBar(bossbar);
+            bossBarManager.stopTracking(trackedEntity);
+            bossBarAudience.hideBossBar(bossBar);
             return;
           }
 
-          bossbar.progress(
+          bossBar.progress(
               (float) trackedEntity.getHealth()
                   / (float) trackedEntity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
-          bossbarAudience.showBossBar(bossbar);
+          bossBarAudience.showBossBar(bossBar);
         };
 
-    bossbarTask = trackedEntity.getScheduler().runAtFixedRate(plugin, task, null, 1, 1);
+    bossBarTask = trackedEntity.getScheduler().runAtFixedRate(plugin, task, null, 1, 1);
   }
 
   public void stop() {
-    Audience.audience(Bukkit.getOnlinePlayers()).hideBossBar(bossbar);
-    bossbarTask.cancel();
+    Audience.audience(Bukkit.getOnlinePlayers()).hideBossBar(bossBar);
+    bossBarTask.cancel();
   }
 }

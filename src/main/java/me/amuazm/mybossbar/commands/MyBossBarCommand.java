@@ -2,8 +2,8 @@ package me.amuazm.mybossbar.commands;
 
 import java.util.UUID;
 import java.util.function.Predicate;
-import me.amuazm.mybossbar.MyBossbar;
-import me.amuazm.mybossbar.managers.BossbarManager;
+import me.amuazm.mybossbar.MyBossBar;
+import me.amuazm.mybossbar.managers.BossBarManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
@@ -22,13 +22,13 @@ import org.jetbrains.annotations.Nullable;
 // track nearest <&| nontracked &| nonplayer &| enemy>
 // tracked tag
 
-public class MyBossbarCommand implements CommandExecutor {
-  private final MyBossbar plugin;
-  private final BossbarManager bossbarManager;
+public class MyBossBarCommand implements CommandExecutor {
+  private final MyBossBar plugin;
+  private final BossBarManager bossBarManager;
 
-  public MyBossbarCommand(MyBossbar plugin) {
+  public MyBossBarCommand(MyBossBar plugin) {
     this.plugin = plugin;
-    this.bossbarManager = plugin.getBossbarManager();
+    this.bossBarManager = plugin.getBossBarManager();
   }
 
   @Override
@@ -78,12 +78,12 @@ public class MyBossbarCommand implements CommandExecutor {
         senderPlayer.sendMessage("The entity you are looking at is not a living entity!");
         return;
       }
-      if (bossbarManager.getTrackedEntities().containsKey(livingEntity)) {
+      if (bossBarManager.getTrackedEntities().containsKey(livingEntity)) {
         senderPlayer.sendMessage("The entity you are looking at is already being tracked!");
         return;
       }
       // Add the entity to the tracked entities
-      bossbarManager.startTracking(livingEntity);
+      bossBarManager.startTracking(livingEntity);
       return;
     }
 
@@ -104,7 +104,7 @@ public class MyBossbarCommand implements CommandExecutor {
         return;
       }
       // Remove the entity from the tracked entities
-      bossbarManager.stopTracking(livingEntity);
+      bossBarManager.stopTracking(livingEntity);
       return;
     }
 
@@ -121,7 +121,7 @@ public class MyBossbarCommand implements CommandExecutor {
         return;
       }
       // Remove the entity from the tracked entities
-      bossbarManager.stopTracking(livingEntity);
+      bossBarManager.stopTracking(livingEntity);
       return;
     }
 
@@ -132,10 +132,10 @@ public class MyBossbarCommand implements CommandExecutor {
     // /mbsb list
     if (args.length == 1) {
       // Get the list of tracked entities
-      bossbarManager
+      bossBarManager
           .getTrackedEntities()
           .forEach(
-              (livingEntity, bossbarShower) -> {
+              (livingEntity, bossBarShower) -> {
                 senderPlayer.sendMessage(livingEntity.getName());
                 // TELEPORT
                 Component tools =
