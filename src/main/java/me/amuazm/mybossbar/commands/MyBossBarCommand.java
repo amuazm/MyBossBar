@@ -1,5 +1,7 @@
 package me.amuazm.mybossbar.commands;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
 import me.amuazm.mybossbar.MyBossBar;
@@ -10,6 +12,7 @@ import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Enemy;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -17,10 +20,6 @@ import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-// track player
-// track nearest <&| nontracked &| nonplayer &| enemy>
-// tracked tag
 
 public class MyBossBarCommand implements CommandExecutor {
   private final MyBossBar plugin;
@@ -68,7 +67,7 @@ public class MyBossBarCommand implements CommandExecutor {
   private void track(Player senderPlayer, String[] args) {
     // /mbsb track
     if (args.length == 1) {
-      // Raytrace the entity if any the player is looking at
+      // Raytrace the entity if any the player is looking at.
       Entity entity = getRayTracedEntity(senderPlayer);
       if (entity == null) {
         senderPlayer.sendMessage("You are not looking at any entity!");
@@ -78,13 +77,82 @@ public class MyBossBarCommand implements CommandExecutor {
         senderPlayer.sendMessage("The entity you are looking at is not a living entity!");
         return;
       }
-      if (bossBarManager.getTrackedEntities().containsKey(livingEntity)) {
-        senderPlayer.sendMessage("The entity you are looking at is already being tracked!");
-        return;
-      }
-      // Add the entity to the tracked entities
+      // Add the entity to the tracked entities.
       bossBarManager.startTracking(livingEntity);
       return;
+    }
+
+    // /mbsb track self
+    if (args.length == 2) {
+      switch (args[1].toLowerCase()) {
+        case "self" -> {
+          // Add the sender to the tracked entities.
+          bossBarManager.startTracking(senderPlayer);
+          return;
+        }
+      }
+    }
+
+    // /mbsb track player <name>
+    if (args.length == 3) {
+      switch (args[1].toLowerCase()) {
+        case "player" -> {
+          // Get the player from the name.
+          Player player = senderPlayer.getServer().getPlayer(args[2]);
+          if (player == null) {
+            senderPlayer.sendMessage("The player with the given name is not online!");
+            return;
+          }
+          // Add the player to the tracked entities.
+          bossBarManager.startTracking(player);
+          return;
+        }
+      }
+    }
+
+    // /mbsb track nearest <&| nontracked &| nonplayer &| enemy>
+    if (args.length >= 2) {
+      switch (args[1].toLowerCase()) {
+        case "nearest" -> {
+          List<String> argsList = Arrays.asList(args);
+          // Add the entity to the tracked entities.
+          senderPlayer.getWorld().getNearbyLivingEntities(senderPlayer.getLocation(), 50).stream()
+              .filter(
+                  livingEntity -> {
+                    if (livingEntity.getUniqueId().equals(senderPlayer.getUniqueId())) {
+                      return false;
+                    }
+                    if (argsList.contains("nontracked")) {
+                      if (bossBarManager.isTracking(livingEntity)) {
+                        return false;
+                      }
+                    }
+                    if (argsList.contains("nonplayer")) {
+                      if (livingEntity instanceof Player) {
+                        return false;
+                      }
+                    }
+                    if (argsList.contains("enemy")) {
+                      if (!(livingEntity instanceof Enemy)) {
+                        return false;
+                      }
+                    }
+                    return true;
+                  })
+              .min(
+                  (livingEntity1, livingEntity2) -> {
+                    Location location1 = livingEntity1.getLocation();
+                    Location location2 = livingEntity2.getLocation();
+                    return Double.compare(
+                        location1.distanceSquared(senderPlayer.getLocation()),
+                        location2.distanceSquared(senderPlayer.getLocation()));
+                  })
+              .ifPresentOrElse(
+                  bossBarManager::startTracking,
+                  () -> senderPlayer.sendMessage("No entity found!"));
+          return;
+        }
+      }
     }
 
     senderPlayer.sendMessage("Invalid arguments!");

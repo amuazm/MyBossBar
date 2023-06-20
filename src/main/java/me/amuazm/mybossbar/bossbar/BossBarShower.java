@@ -26,6 +26,7 @@ public class BossBarShower {
     this.bossBarManager = plugin.getBossBarManager();
     this.trackedEntity = trackedEntity;
 
+    // Initialize boss bar.
     bossBar =
         BossBar.bossBar(
             Component.text(trackedEntity.getName()),
@@ -36,13 +37,12 @@ public class BossBarShower {
 
     Consumer<ScheduledTask> task =
         (scheduledTask) -> {
-          // Show health in bossbar to nearby players
           Audience allAudience = Audience.audience(Bukkit.getOnlinePlayers());
           Collection<UUID> nearbyPlayerUuids =
-              trackedEntity.getWorld().getNearbyPlayers(trackedEntity.getLocation(), 32).stream()
+              trackedEntity.getWorld().getNearbyPlayers(trackedEntity.getLocation(), 50).stream()
                   .map(Player::getUniqueId)
                   .toList();
-          Audience bossBarAudience =
+          Audience nearbyAudience =
               allAudience.filterAudience(
                   audience ->
                       audience instanceof Player player
@@ -52,18 +52,22 @@ public class BossBarShower {
                   audience ->
                       audience instanceof Player
                           && !nearbyPlayerUuids.contains(((Player) audience).getUniqueId()));
+
+          // Ensure players out of range don't see the boss bar.
           otherAudience.hideBossBar(bossBar);
 
+          // Should we retire the boss bar?
           if (!trackedEntity.isValid() || !(trackedEntity.getChunk().isLoaded())) {
             bossBarManager.stopTracking(trackedEntity);
-            bossBarAudience.hideBossBar(bossBar);
+            nearbyAudience.hideBossBar(bossBar);
             return;
           }
 
+          // Show health of entity in bossbar to nearby players.
           bossBar.progress(
               (float) trackedEntity.getHealth()
                   / (float) trackedEntity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
-          bossBarAudience.showBossBar(bossBar);
+          nearbyAudience.showBossBar(bossBar);
         };
 
     bossBarTask = trackedEntity.getScheduler().runAtFixedRate(plugin, task, null, 1, 1);
