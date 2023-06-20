@@ -2,6 +2,7 @@ package me.amuazm.mybossbar;
 
 import lombok.Getter;
 import me.amuazm.mybossbar.commands.MyBossBarCommand;
+import me.amuazm.mybossbar.commands.MyBossBarTabCompleter;
 import me.amuazm.mybossbar.managers.BossBarManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -12,8 +13,7 @@ public final class MyBossBar extends JavaPlugin {
   public void onEnable() {
     // Plugin startup logic
     initializeManagers();
-
-    getCommand("mybossbar").setExecutor(new MyBossBarCommand(this));
+    initializeCommands();
   }
 
   @Override
@@ -23,5 +23,10 @@ public final class MyBossBar extends JavaPlugin {
 
   private void initializeManagers() {
     bossBarManager = new BossBarManager(this);
+  }
+
+  private void initializeCommands() {
+    getCommand("mybossbar").setExecutor(new MyBossBarCommand(this));
+    getCommand("mybossbar").setTabCompleter(new MyBossBarTabCompleter(this));
   }
 }

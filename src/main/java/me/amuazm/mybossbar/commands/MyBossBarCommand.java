@@ -2,9 +2,11 @@ package me.amuazm.mybossbar.commands;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
 import me.amuazm.mybossbar.MyBossBar;
+import me.amuazm.mybossbar.bossbar.BossBarShower;
 import me.amuazm.mybossbar.managers.BossBarManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -132,6 +134,11 @@ public class MyBossBarCommand implements CommandExecutor {
                         return false;
                       }
                     }
+                    if (argsList.contains("player")) {
+                      if (!(livingEntity instanceof Player)) {
+                        return false;
+                      }
+                    }
                     if (argsList.contains("enemy")) {
                       if (!(livingEntity instanceof Enemy)) {
                         return false;
@@ -176,10 +183,21 @@ public class MyBossBarCommand implements CommandExecutor {
       return;
     }
 
-    // /mbsb remove <uuid>
+    // /mbsb remove all
     if (args.length == 2) {
+      switch (args[1].toLowerCase()) {
+        case "all" -> {
+          // Remove all tracked entities
+          bossBarManager.stopTrackingAll();
+          return;
+        }
+      }
+    }
+
+    // /mbsb remove uuid <uuid>
+    if (args.length == 3) {
       // Get the entity from the uuid
-      Entity entity = senderPlayer.getWorld().getEntity(UUID.fromString(args[1]));
+      Entity entity = senderPlayer.getWorld().getEntity(UUID.fromString(args[2]));
       if (entity == null) {
         senderPlayer.sendMessage("The entity with the given uuid does not exist!");
         return;
@@ -200,39 +218,44 @@ public class MyBossBarCommand implements CommandExecutor {
     // /mbsb list
     if (args.length == 1) {
       // Get the list of tracked entities
-      bossBarManager
-          .getTrackedEntities()
-          .forEach(
-              (livingEntity, bossBarShower) -> {
-                senderPlayer.sendMessage(livingEntity.getName());
-                // TELEPORT
-                Component tools =
+      Map<LivingEntity, BossBarShower> trackedEntities = bossBarManager.getTrackedEntities();
+
+      if (trackedEntities.isEmpty()) {
+        senderPlayer.sendMessage("No entities are being tracked!");
+        return;
+      }
+
+      trackedEntities.forEach(
+          (livingEntity, bossBarShower) -> {
+            senderPlayer.sendMessage(livingEntity.getName());
+            // TELEPORT
+            Component tools =
+                MiniMessage.miniMessage()
+                    .deserialize(
+                        "<click:run_command:'/minecraft:tp "
+                            + livingEntity.getUniqueId()
+                            + "'>[Teleport]</click>");
+
+            // KILL
+            tools =
+                tools.append(
                     MiniMessage.miniMessage()
                         .deserialize(
-                            "<click:run_command:'/minecraft:tp "
+                            " <click:run_command:'/minecraft:kill "
                                 + livingEntity.getUniqueId()
-                                + "'>[Teleport]</click>");
+                                + "'>[Kill]</click>"));
 
-                // STOP TRACKING
-                tools =
-                    tools.append(
-                        MiniMessage.miniMessage()
-                            .deserialize(
-                                " <click:run_command:'/mbsb remove "
-                                    + livingEntity.getUniqueId()
-                                    + "'>[Stop Tracking]</click>"));
+            // STOP TRACKING
+            tools =
+                tools.append(
+                    MiniMessage.miniMessage()
+                        .deserialize(
+                            " <click:run_command:'/mbsb remove "
+                                + livingEntity.getUniqueId()
+                                + "'>[Stop Tracking]</click>"));
 
-                // KILL
-                tools =
-                    tools.append(
-                        MiniMessage.miniMessage()
-                            .deserialize(
-                                " <click:run_command:'/minecraft:kill "
-                                    + livingEntity.getUniqueId()
-                                    + "'>[Kill]</click>"));
-
-                senderPlayer.sendMessage(tools);
-              });
+            senderPlayer.sendMessage(tools);
+          });
       return;
     }
 

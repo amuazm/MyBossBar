@@ -35,6 +35,12 @@ public class BossBarManager {
     trackedEntities.remove(livingEntity);
   }
 
+  public void stopTrackingAll() {
+    for (LivingEntity livingEntity : trackedEntities.keySet()) {
+      stopTracking(livingEntity);
+    }
+  }
+
   public boolean isTracking(LivingEntity livingEntity) {
     for (Map.Entry<LivingEntity, BossBarShower> entry : trackedEntities.entrySet()) {
       if (entry.getKey().getUniqueId().equals(livingEntity.getUniqueId())) {
