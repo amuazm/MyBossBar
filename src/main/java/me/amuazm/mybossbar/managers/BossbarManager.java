@@ -27,7 +27,7 @@ public class BossbarManager {
     if (bossbarShower == null) {
       return;
     }
-    bossbarShower.cancelBossbarTask();
+    bossbarShower.stop();
     trackedEntities.remove(livingEntity);
   }
 }

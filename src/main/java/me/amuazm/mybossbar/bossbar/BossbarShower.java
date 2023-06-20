@@ -69,7 +69,7 @@ public class BossbarShower {
     bossbarTask = trackedEntity.getScheduler().runAtFixedRate(plugin, task, null, 1, 1);
   }
 
-  public void cancelBossbarTask() {
+  public void stop() {
     Audience.audience(Bukkit.getOnlinePlayers()).hideBossBar(bossbar);
     bossbarTask.cancel();
   }

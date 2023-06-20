@@ -18,8 +18,9 @@ import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-// nearest
-// nearest <nontracked &| nonplayer>
+// track player
+// track nearest <&| nontracked &| nonplayer &| enemy>
+// tracked tag
 
 public class MyBossbarCommand implements CommandExecutor {
   private final MyBossbar plugin;
