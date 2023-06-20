@@ -24,6 +24,9 @@ public class BossbarManager {
 
   public void stopTracking(LivingEntity livingEntity) {
     BossbarShower bossbarShower = trackedEntities.get(livingEntity);
+    if (bossbarShower == null) {
+      return;
+    }
     bossbarShower.cancelBossbarTask();
     trackedEntities.remove(livingEntity);
   }
