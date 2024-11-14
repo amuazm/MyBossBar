@@ -1,0 +1,14 @@
+name: MyBossBar
+version: '1.0.0'
+main: me.amuazm.myBossBar.MyBossBar
+api-version: '1.20'
+authors: [ amuazm ]
+description: Convenient Boss Bar Commands
+folia-supported: true
+commands:
+  mybossbar:
+    description: "Main command for MyBossBar"
+    permission: mybossbar.player.main
+    usage: /mybossbar
+    aliases:
+      - mbsb
