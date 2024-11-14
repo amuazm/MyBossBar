@@ -26,10 +26,12 @@ public class BossBarShower {
         this.bossBarManager = plugin.getBossBarManager();
         this.trackedEntity = trackedEntity;
 
+        Component customName = trackedEntity.customName();
+
         // Initialize boss bar.
         bossBar =
                 BossBar.bossBar(
-                        Component.text(trackedEntity.getName()),
+                        customName != null ? customName : trackedEntity.name(),
                         (float) trackedEntity.getHealth()
                                 / (float) trackedEntity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue(),
                         BossBar.Color.RED,
