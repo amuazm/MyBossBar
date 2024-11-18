@@ -19,6 +19,11 @@ public final class MyBossBar extends JavaPlugin {
         registerListeners();
     }
 
+    @Override
+    public void onDisable() {
+        bossBarManager.stopTrackingAll();
+    }
+
     private void initializeManagers() {
         bossBarManager = new BossBarManager(this);
     }
