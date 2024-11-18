@@ -5,6 +5,8 @@ import me.amuazm.myBossBar.bossbar.BossBarManager;
 import me.amuazm.myBossBar.commands.MyBossBarCommand;
 import me.amuazm.myBossBar.commands.MyBossBarTabCompleter;
 import me.amuazm.myBossBar.listeners.CreatureSpawnListener;
+import me.amuazm.myBossBar.listeners.EntityDamagedByEntityListener;
+import me.amuazm.myBossBar.listeners.EntityDeathListener;
 import me.amuazm.myBossBar.listeners.PlayerQuitListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -35,6 +37,8 @@ public final class MyBossBar extends JavaPlugin {
 
     private void registerListeners() {
         getServer().getPluginManager().registerEvents(new CreatureSpawnListener(this), this);
+        getServer().getPluginManager().registerEvents(new EntityDamagedByEntityListener(this), this);
+        getServer().getPluginManager().registerEvents(new EntityDeathListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerQuitListener(this), this);
     }
 }

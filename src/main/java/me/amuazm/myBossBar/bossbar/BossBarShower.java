@@ -29,48 +29,46 @@ public class BossBarShower {
         Component customName = trackedEntity.customName();
 
         // Initialize boss bar.
-        bossBar =
-                BossBar.bossBar(
-                        customName != null ? customName : trackedEntity.name(),
-                        (float) trackedEntity.getHealth()
-                                / (float) trackedEntity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue(),
-                        BossBar.Color.RED,
-                        BossBar.Overlay.PROGRESS);
+        bossBar = BossBar.bossBar(
+                customName != null ? customName : trackedEntity.name(),
+                (float) trackedEntity.getHealth()
+                        / (float) trackedEntity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue(),
+                BossBar.Color.RED,
+                BossBar.Overlay.PROGRESS);
 
-        Consumer<ScheduledTask> task =
-                (scheduledTask) -> {
-                    Audience allAudience = Audience.audience(Bukkit.getOnlinePlayers());
-                    Collection<UUID> nearbyPlayerUuids =
-                            trackedEntity.getWorld().getNearbyPlayers(trackedEntity.getLocation(), 50).stream()
-                                    .map(Player::getUniqueId)
-                                    .toList();
-                    Audience nearbyAudience =
-                            allAudience.filterAudience(
-                                    audience ->
-                                            audience instanceof Player player
-                                                    && nearbyPlayerUuids.contains(player.getUniqueId()));
-                    Audience otherAudience =
-                            allAudience.filterAudience(
-                                    audience ->
-                                            audience instanceof Player
-                                                    && !nearbyPlayerUuids.contains(((Player) audience).getUniqueId()));
+        Consumer<ScheduledTask> task = (scheduledTask) -> {
+            Audience allAudience = Audience.audience(Bukkit.getOnlinePlayers());
 
-                    // Ensure players out of range don't see the boss bar.
-                    otherAudience.hideBossBar(bossBar);
+            if (!trackedEntity.getChunk().isLoaded()) {
+                allAudience.hideBossBar(bossBar);
+                return;
+            }
 
-                    // Should we retire the boss bar?
-                    if (!trackedEntity.isValid() || !(trackedEntity.getChunk().isLoaded())) {
-                        bossBarManager.stopTracking(trackedEntity);
-                        nearbyAudience.hideBossBar(bossBar);
-                        return;
-                    }
+            Collection<UUID> nearbyPlayerUuids = trackedEntity.getWorld()
+                    .getNearbyPlayers(trackedEntity.getLocation(), 50)
+                    .stream()
+                    .map(Player::getUniqueId)
+                    .toList();
 
-                    // Show health of entity in bossbar to nearby players.
-                    bossBar.progress(
-                            (float) trackedEntity.getHealth()
-                                    / (float) trackedEntity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
-                    nearbyAudience.showBossBar(bossBar);
-                };
+            Audience nearbyAudience = allAudience.filterAudience(audience -> {
+                return audience instanceof Player player
+                        && nearbyPlayerUuids.contains(player.getUniqueId());
+            });
+
+            Audience otherAudience = allAudience.filterAudience(audience -> {
+                return audience instanceof Player
+                        && !nearbyPlayerUuids.contains(((Player) audience).getUniqueId());
+            });
+
+            // Ensure players out of range don't see the boss bar.
+            otherAudience.hideBossBar(bossBar);
+
+            // Show health of entity in bossbar to nearby players.
+            bossBar.progress((float) trackedEntity.getHealth()
+                    / (float) trackedEntity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
+
+            nearbyAudience.showBossBar(bossBar);
+        };
 
         bossBarTask = trackedEntity.getScheduler().runAtFixedRate(plugin, task, null, 1, 1);
     }

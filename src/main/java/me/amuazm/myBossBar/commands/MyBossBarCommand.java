@@ -226,31 +226,32 @@ public class MyBossBarCommand implements CommandExecutor {
                 return;
             }
 
-            trackedEntities.forEach(
-                    (livingEntity, bossBarShower) -> {
-                        livingEntity.getScheduler().run(plugin, scheduledTask -> {
-                            senderPlayer.sendMessage(livingEntity.getName());
-                            // TELEPORT
-                            Component tools = MiniMessage.miniMessage().deserialize(
-                                    "<click:run_command:'/minecraft:tp "
-                                            + livingEntity.getUniqueId()
-                                            + "'>[Teleport]</click>");
+            trackedEntities.forEach((livingEntity, bossBarShower) -> {
+                livingEntity.getScheduler().run(plugin, scheduledTask -> {
+                    Component customName = livingEntity.customName();
+                    senderPlayer.sendMessage(customName != null ? customName : livingEntity.name());
 
-                            // KILL
-                            tools = tools.append(MiniMessage.miniMessage().deserialize(
-                                    " <click:run_command:'/minecraft:kill "
-                                            + livingEntity.getUniqueId()
-                                            + "'>[Kill]</click>"));
+                    // TELEPORT
+                    Component tools = MiniMessage.miniMessage().deserialize(
+                            "<click:run_command:'/minecraft:tp "
+                                    + livingEntity.getUniqueId()
+                                    + "'>[Teleport]</click>");
 
-                            // STOP TRACKING
-                            tools = tools.append(MiniMessage.miniMessage().deserialize(
-                                    " <click:run_command:'/mbsb remove uuid "
-                                            + livingEntity.getUniqueId()
-                                            + "'>[Stop Tracking]</click>"));
+                    // KILL
+                    tools = tools.append(MiniMessage.miniMessage().deserialize(
+                            " <click:run_command:'/minecraft:kill "
+                                    + livingEntity.getUniqueId()
+                                    + "'>[Kill]</click>"));
 
-                            senderPlayer.sendMessage(tools);
-                        }, null);
-                    });
+                    // STOP TRACKING
+                    tools = tools.append(MiniMessage.miniMessage().deserialize(
+                            " <click:run_command:'/mbsb remove uuid "
+                                    + livingEntity.getUniqueId()
+                                    + "'>[Stop Tracking]</click>"));
+
+                    senderPlayer.sendMessage(tools);
+                }, null);
+            });
             return;
         }
 
