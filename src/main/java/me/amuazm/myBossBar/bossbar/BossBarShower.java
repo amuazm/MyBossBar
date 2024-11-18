@@ -62,7 +62,6 @@ public class BossBarShower {
                     if (!trackedEntity.isValid() || !(trackedEntity.getChunk().isLoaded())) {
                         bossBarManager.stopTracking(trackedEntity);
                         nearbyAudience.hideBossBar(bossBar);
-                        scheduledTask.cancel();
                         return;
                     }
 
